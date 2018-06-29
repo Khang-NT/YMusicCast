@@ -11,6 +11,12 @@
         const context = cast.framework.CastReceiverContext.getInstance();
         const playerManager = context.getPlayerManager();
 
+        function getLocation(href) {
+            var l = document.createElement("a");
+            l.href = href;
+            return l;
+        };
+
         playerManager.setMessageInterceptor(
             cast.framework.messages.MessageType.LOAD, loadRequestData => {
                 console.log(loadRequestData.media);
@@ -18,7 +24,16 @@
                     return fetch(loadRequestData.media.entity)
                         .then(res => res.json())
                         .then(mediaInfo => {
-                            loadRequestData.media.contentUrl = mediaInfo.play_url;
+                            let contentUrl = "";
+                            if (mediaInfo.play_url.indexOf("//") == 0) { 
+                                contentUrl = "https:" + mediaInfo.play_url; // assume current protocol is https
+                            } else if (mediaInfo.play_url.indexOf("/") == 0) {
+                                let origin = getLocation(loadRequestData.media.entity).origin;
+                                contentUrl = origin + mediaInfo.play_url;
+                            } else {
+                                contentUrl = mediaInfo.play_url;
+                            }
+                            loadRequestData.media.contentUrl = contentUrl;
                             loadRequestData.media.contentType = mediaInfo.mime_type;
                             if (mediaInfo.subtitles) {
                                 let tracks = [];
