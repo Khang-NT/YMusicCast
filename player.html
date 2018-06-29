@@ -1,0 +1,48 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js">
+    </script>
+</head>
+
+<body>
+    <cast-media-player></cast-media-player>
+    <script>
+        const context = cast.framework.CastReceiverContext.getInstance();
+        const playerManager = context.getPlayerManager();
+
+        playerManager.setMessageInterceptor(
+            cast.framework.messages.MessageType.LOAD, loadRequestData => {
+                console.log(loadRequestData.media);
+                if (loadRequestData.media && loadRequestData.media.entity) {
+                    return fetch(loadRequestData.media.entity)
+                        .then(res => res.json())
+                        .then(mediaInfo => {
+                            loadRequestData.media.contentUrl = mediaInfo.play_url;
+                            loadRequestData.media.contentType = mediaInfo.mime_type;
+                            if (mediaInfo.subtitles) {
+                                let tracks = [];
+                                for (let i = 0; i < mediaInfo.subtitles.length; i++) {
+                                    const subtitleInfo  = mediaInfo.subtitles[i];
+                                    tracks += {
+                                        trackId: i,
+                                        type: cast.framework.messages.TrackType.TEXT,
+                                        language: subtitleInfo.language,
+                                        name: subtitleInfo.name,
+                                        trackContentType: subtitleInfo.mime_type,
+                                        trackContentId: subtitleInfo.url
+                                    };
+                                }
+                                loadRequestData.media.tracks = tracks;
+                            }
+                            return loadRequestData;
+                        });
+                }
+                return loadRequestData;
+            });
+        
+        context.start();
+    </script>
+</body>
+
+</html>
