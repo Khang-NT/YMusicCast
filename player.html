@@ -7,6 +7,11 @@
 
 <body>
     <cast-media-player></cast-media-player>
+    <style>
+        #player {
+            --splash-image: url("https://labs-public-dl.xda-cdn.com/images/46a1068b-8708-415f-8271-6219234a3f85.png");
+        }
+    </style>
     <script>
         const context = cast.framework.CastReceiverContext.getInstance();
         const playerManager = context.getPlayerManager();
@@ -32,7 +37,7 @@
                                 contentUrl = origin + mediaInfo.play_url;
                             } else {
                                 contentUrl = mediaInfo.play_url;
-                            }
+                            }g
                             loadRequestData.media.contentUrl = contentUrl;
                             loadRequestData.media.contentType = mediaInfo.mime_type;
                             if (mediaInfo.subtitles) {
